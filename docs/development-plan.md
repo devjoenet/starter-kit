@@ -1,6 +1,8 @@
 ---
-- PHP 8.3+ (`composer.json` currently allows `^8.3`)
-- Laravel 13
+- PHP 8.5+ (`composer.json` currently requires `^8.5`)
+- Laravel 13.7+
+- Node 24.16.0+
+- npm 11.13.0 via `packageManager`
 - MySQL 8+ for local application data
 - SQLite in-memory for the current PHPUnit test configuration
 - Redis available in environment configuration, not yet the default cache/queue/session store
@@ -37,15 +39,16 @@ Already present:
 - Prettier configuration
 - Strict TypeScript mode
 - npm package lock and Node 24.16.0 runtime metadata
+- npm 11.13.0 package-manager metadata
 - Reka UI / shadcn-vue inspired component primitives
 - Lucide icon package
 - Rector configuration and dependency
+- Laravel Boost and Pao development tooling
 - Basic layouts, settings pages, dashboard, and auth pages
 - PHPUnit test structure and existing auth/settings tests
 
 Not yet present:
 
-- Project identity cleanup from the upstream Laravel starter kit
 - CI workflow
 - PHPStan/Larastan configuration
 - Spatie Data / TypeScript Transformer
@@ -65,6 +68,17 @@ Checked root config and dotfiles against `composer.json` and `package.json`.
 
 - No current root config imports a missing Composer or npm package.
 
+### Runtime Version Alignment
+
+- `composer.json` requires PHP `^8.5`.
+- `.nvmrc` pins Node `24.16.0`.
+- `package.json` requires Node `>=24.16.0`.
+- `package.json` declares npm `11.13.0` through `packageManager`.
+- Local PHP and Composer commands should run through Herd.
+- npm commands should run from the Node version in `.nvmrc`; `herd npm` is not available in the current local Herd setup.
+
+PHP 8.5 is a deliberately high floor for a starter kit. Keep it only if consuming projects are expected to start on PHP 8.5; lowering it later will require a Composer constraint change plus a full Rector, Pint, PHPUnit, and frontend verification pass.
+
 ### Present and Satisfied Package References
 
 - `vite.config.ts`
@@ -79,10 +93,17 @@ Checked root config and dotfiles against `composer.json` and `package.json`.
 - `rector.php`
   - Uses `rector/rector`.
   - Present in `composer.json` `require-dev`.
+- `boost.json`
+  - Uses Laravel Boost agent/tooling configuration.
+  - `laravel/boost` is present in `composer.json` `require-dev`.
+- `components.json`
+  - Uses shadcn-vue/Tailwind CSS 4 component generation settings.
+  - Tailwind config is intentionally blank because Tailwind CSS 4 does not require a `tailwind.config.js` file.
 
 ### Config Cleanup Notes
 
 - `.npmrc` sets `ignore-scripts=true`; keep only if that is an intentional security default and does not block needed package postinstall behavior.
+- Composer `setup` and `dev` scripts call `npm` directly. That is fine as long as the Node 24.16.0 bin directory is active before running those Composer scripts locally.
 
 ## Development Standards
 
@@ -319,7 +340,7 @@ Third-party APIs should not leak directly into application logic.
 - [x] Update Composer description, keywords, and project metadata.
 - [x] Rewrite `README.md` for Southeast Code usage.
 - [x] Remove upstream Laravel contribution/Maestro references.
-- [ ] Decide whether the public package identity is `southeastcode/starter-kit`, `southeastcode/vue-starter-kit`, or something else.
+- [x] Set public package identity to `devjoenet/starter-kit`.
 - [ ] Replace or remove remaining default starter pages.
 - [ ] Replace starter branding with Southeast Code branding.
 - [x] Fix `.env.example` typo and duplicate AWS path-style setting.
@@ -329,6 +350,8 @@ Third-party APIs should not leak directly into application logic.
 - [x] Update Composer setup scripts to use the chosen package manager.
 - [x] Reconcile or delete `eslint.config.ts`.
 - [x] Reconcile `components.json` with Tailwind CSS 4 and the missing `tailwind.config.js`.
+- [x] Pin PHP and Node runtime requirements in Composer, npm metadata, and `.nvmrc`.
+- [x] Document Herd PHP/Composer usage and npm-from-Node setup behavior.
 
 ## Phase 1 - Core Package Adoption
 
@@ -344,6 +367,7 @@ Third-party APIs should not leak directly into application logic.
 ### Development Packages
 
 - [x] Install `rector/rector` or remove `rector.php`.
+- [x] Install Laravel Boost/Pao development tooling.
 - [ ] Install `larastan/larastan`.
 - [ ] Add `phpstan.neon`.
 - [ ] Decide whether to keep PHPUnit only or adopt Pest.
@@ -449,17 +473,20 @@ Third-party APIs should not leak directly into application logic.
 
 - [ ] Add GitHub Actions workflow.
 - [ ] Run Composer validation.
+- [ ] Run Rector validation.
 - [ ] Run Pint validation.
 - [ ] Run PHPStan/Larastan.
 - [ ] Run PHPUnit.
 - [ ] Run npm lint check.
 - [ ] Run npm format check.
+- [ ] Generate Wayfinder routes/forms before TypeScript validation.
 - [ ] Run TypeScript check.
 - [ ] Run frontend build verification.
 
 ### Documentation
 
-- [ ] Write development setup guide.
+- [x] Write basic development setup guide in `README.md`.
+- [ ] Expand development setup guide with production-like local service notes.
 - [ ] Write architecture guide.
 - [ ] Write UI component guide.
 - [ ] Write authorization guide.
@@ -476,9 +503,10 @@ Third-party APIs should not leak directly into application logic.
 
 ## Version 1.0 Release Criteria
 
-- [ ] Project metadata no longer references the upstream starter kit.
-- [ ] README is accurate for Southeast Code.
+- [x] Project metadata no longer references the upstream starter kit.
+- [x] README is accurate for current Southeast Code local setup.
 - [x] Package manager and lock file are settled.
+- [x] PHP and Node runtime requirements are pinned.
 - [x] Root config files do not reference missing packages or missing config files.
 - [ ] Core package installation is complete.
 - [ ] DTO architecture is documented and demonstrated.
@@ -488,6 +516,6 @@ Third-party APIs should not leak directly into application logic.
 - [ ] Design system foundation is complete.
 - [ ] Core UI components are complete.
 - [ ] DataTable framework is complete.
-- [ ] Static analysis tooling passes.
+- [ ] Static analysis tooling passes, including Rector and PHPStan/Larastan once Larastan is installed.
 - [ ] CI pipeline passes.
 - [ ] Documentation is complete enough for a new project to start from this kit without archaeological work.
