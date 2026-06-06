@@ -1,27 +1,39 @@
-# Laravel + Vue Starter Kit
+# Southeast Code Starter Kit
 
-## Introduction
+## Overview
 
-Our Vue starter kit provides a robust, modern starting point for building Laravel applications with a Vue frontend using [Inertia](https://inertiajs.com).
+This repository is the Southeast Code starter application for Laravel projects with Vue, Inertia, TypeScript, Tailwind CSS, Fortify, passkeys, and Wayfinder.
 
-Inertia allows you to build modern, single-page Vue applications using classic server-side routing and controllers. This lets you enjoy the frontend power of Vue combined with the incredible backend productivity of Laravel and lightning-fast Vite compilation.
+## Local Setup
 
-This Vue starter kit utilizes Vue 3 and the Composition API, TypeScript, Tailwind, and the [shadcn-vue](https://www.shadcn-vue.com) component library.
+This project is intended to run locally through Laravel Herd. Use Herd for PHP and Composer; npm should come from the Node version in `.nvmrc`.
 
-## Official Documentation
+```bash
+herd composer install
+npm install
+cp .env.example .env
+herd php artisan key:generate
+herd php artisan migrate
+herd php artisan storage:link
+npm run build
+```
 
-Documentation for all Laravel starter kits can be found on the [Laravel website](https://laravel.com/docs/starter-kits).
+## Verification
 
-## Contributing
+```bash
+herd composer validate --strict
+herd composer run lint:check
+herd php artisan test
+npm run lint:check
+npm run format:check
+npm run types:check
+npm run build
+```
 
-Thank you for considering contributing to our starter kit! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Development Plan
 
-All contributions to the Starter Kits from now on should be made through [Maestro](https://github.com/laravel/maestro).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+See [docs/development-plan.md](docs/development-plan.md).
 
 ## License
 
-The Laravel + Vue starter kit is open-sourced software licensed under the MIT license.
+This starter kit is open-sourced software licensed under the MIT license.
