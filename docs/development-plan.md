@@ -145,6 +145,8 @@ Typing rules:
 Current implementation notes:
 
 - Existing application model configuration uses native Laravel attributes where available. `User` uses `#[Fillable]` and `#[Hidden]` instead of static model properties.
+- `User` implements `MustVerifyEmail`, so routes protected by Laravel's `verified` middleware actually block unverified accounts.
+- Settings controllers use Laravel 13 controller middleware attributes for controller-owned authentication, verification, password-confirmation, and throttle rules. Route-only redirects and Inertia route closures keep route middleware.
 - Current PHP tests use Pest syntax with explicit `void` closure return types.
 - Custom generator stubs in `stubs/` should keep generated PHP files on the strict typing path by default.
 - PHPStan/Larastan currently runs at level 6 with PestStan enabled for Pest tests.
@@ -432,16 +434,17 @@ Third-party APIs should not leak directly into application logic.
 
 - [x] Audit Laravel 13 attribute coverage for the current model/test surface and generator defaults.
 - [x] Convert existing Eloquent model static configuration to native attributes where Laravel provides direct replacements.
-- [ ] Convert controller middleware and policy authorization declarations to native attributes where the behavior belongs to a controller or action.
-- [ ] Convert queued job configuration properties to native queue attributes when jobs are added.
-- [ ] Convert service container contextual binding/provider boilerplate to native container attributes where possible.
+- [x] Convert current controller middleware declarations to native attributes where the behavior belongs to a controller or action.
+- [x] Confirm there are no current policy authorization declarations to convert; use `#[Authorize]` when policies are added to controller actions.
+- [x] Confirm there are no current queued jobs with legacy configuration properties to convert; use native queue attributes when jobs are added.
+- [x] Confirm there is no current service container contextual binding/provider boilerplate to convert; use native container attributes when contextual injection is needed.
 - [x] Add console command stubs that use native console attributes for generated command signatures.
 - [x] Convert current PHPUnit class tests to Pest syntax.
 - [x] Add typed `void` closures to current Pest tests.
 - [x] Add PHPDoc generics for current framework contracts that PHPStan needs, such as `HasFactory`.
 - [x] Raise PHPStan/Larastan strictness from level 5 to level 6.
-- [ ] Continue applying native attributes, typed signatures, and detailed PHPDoc to future controllers, jobs, commands, policies, actions, and data objects as they are added.
-- [ ] Evaluate raising PHPStan/Larastan beyond level 6 after broader application features exist.
+- [x] Document that future controllers, jobs, commands, policies, actions, and data objects must keep using native attributes, typed signatures, and detailed PHPDoc as they are added.
+- [x] Evaluate PHPStan/Larastan beyond level 6: keep level 6 until broader application features exist, then revisit with a larger real code surface.
 
 ## Phase 2 - Runtime Infrastructure
 

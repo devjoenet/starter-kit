@@ -10,10 +10,12 @@ use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
+#[Middleware('auth')]
 class ProfileController extends Controller
 {
     /**
@@ -48,6 +50,7 @@ class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
+    #[Middleware('verified')]
     public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {
         $user = $request->user();

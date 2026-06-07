@@ -7,6 +7,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+test('guests are redirected from the profile page to login', function (): void {
+    $response = $this->get(route('profile.edit'));
+
+    $response->assertRedirect(route('login'));
+});
+
 test('profile page is displayed', function (): void {
     $user = User::factory()->create();
 
@@ -70,6 +76,20 @@ test('user can delete their account', function (): void {
 
     $this->assertGuest();
     expect($user->fresh())->toBeNull();
+});
+
+test('unverified users cannot delete their account', function (): void {
+    $user = User::factory()->unverified()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->delete(route('profile.destroy'), [
+            'password' => 'password',
+        ]);
+
+    $response->assertRedirect(route('verification.notice'));
+
+    expect($user->fresh())->not->toBeNull();
 });
 
 test('correct password must be provided to delete account', function (): void {
