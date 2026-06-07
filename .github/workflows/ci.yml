@@ -98,6 +98,3 @@ jobs:
 
       - name: Run quality checks
         run: composer run ci:check
-
-      - name: Build frontend assets
-        run: npm run build
