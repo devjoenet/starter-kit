@@ -43,14 +43,14 @@ Already present:
 - Reka UI / shadcn-vue inspired component primitives
 - Lucide icon package
 - Rector configuration and dependency
+- PHPStan/Larastan configuration and dependency
 - Laravel Boost and Pao development tooling
 - Basic layouts, settings pages, dashboard, and auth pages
 - PHPUnit test structure and existing auth/settings tests
+- GitHub Actions CI workflow
 
 Not yet present:
 
-- CI workflow
-- PHPStan/Larastan configuration
 - Spatie Data / TypeScript Transformer
 - Spatie Permission
 - Spatie Activity Log
@@ -99,6 +99,8 @@ PHP 8.5 is a deliberately high floor for a starter kit. Keep it only if consumin
 - `components.json`
   - Uses shadcn-vue/Tailwind CSS 4 component generation settings.
   - Tailwind config is intentionally blank because Tailwind CSS 4 does not require a `tailwind.config.js` file.
+- `package.json`
+  - Uses an npm override to keep transitive PostCSS resolution on the patched `^8.5.15` line.
 
 ### Config Cleanup Notes
 
@@ -106,6 +108,35 @@ PHP 8.5 is a deliberately high floor for a starter kit. Keep it only if consumin
 - Composer `setup` and `dev` scripts call `npm` directly. That is fine as long as the Node 24.16.0 bin directory is active before running those Composer scripts locally.
 
 ## Development Standards
+
+### Laravel 13 Attributes and Types
+
+Prefer Laravel 13 native PHP attributes for framework configuration when Laravel provides a direct equivalent.
+
+Target areas:
+
+- Eloquent model configuration
+- Routing and controller middleware/authorization
+- Queue and background job controls
+- Service container and dependency injection
+- Artisan console command metadata
+
+Use attributes to keep configuration close to the class, method, parameter, or property it affects. Do not force attributes where Laravel does not provide an equivalent or where a method is required for dynamic behavior.
+
+Examples:
+
+- Use model attributes such as `#[Fillable]`, `#[Guarded]`, `#[Hidden]`, `#[Table]`, `#[UseFactory]`, `#[UsePolicy]`, `#[ScopedBy]`, and related Eloquent attributes where they replace static model configuration cleanly.
+- Use controller attributes such as `#[Middleware]` and `#[Authorize]` instead of controller middleware methods or route-level authorization middleware when the behavior belongs to the controller/action.
+- Use queue attributes such as `#[Connection]`, `#[Queue]`, `#[Tries]`, `#[Backoff]`, `#[Timeout]`, `#[MaxExceptions]`, `#[FailOnTimeout]`, `#[WithoutRelations]`, and related job attributes instead of queue configuration properties when adding jobs.
+- Use container attributes such as `#[Config]`, `#[CurrentUser]`, `#[Storage]`, `#[Cache]`, `#[DB]`, `#[Log]`, `#[Give]`, `#[RouteParameter]`, `#[Tag]`, `#[Singleton]`, and `#[Scoped]` where they make dependency wiring explicit.
+- Use console attributes such as `#[Signature]`, `#[Description]`, `#[Help]`, `#[Aliases]`, `#[Usage]`, and `#[Hidden]` for Artisan commands.
+
+Typing rules:
+
+- Use typed properties, parameters, and return values everywhere PHP can represent the type accurately.
+- Use detailed PHPDoc when native PHP types are not expressive enough, especially for arrays, collections, Eloquent builders, paginator payloads, validated request data, closures, generators, and iterable service collections.
+- Prefer precise generics over vague arrays, for example `array<string, mixed>`, `Collection<int, User>`, or `Builder<User>`.
+- Keep PHPStan/Larastan passing without baselines or inline ignores unless a framework limitation leaves no honest alternative.
 
 ### Controllers
 
@@ -368,10 +399,22 @@ Third-party APIs should not leak directly into application logic.
 
 - [x] Install `rector/rector` or remove `rector.php`.
 - [x] Install Laravel Boost/Pao development tooling.
-- [ ] Install `larastan/larastan`.
-- [ ] Add `phpstan.neon`.
+- [x] Install `larastan/larastan`.
+- [x] Add `phpstan.neon`.
 - [ ] Decide whether to keep PHPUnit only or adopt Pest.
 - [x] Remove `pestphp/pest-plugin` from Composer `allow-plugins` if Pest is not adopted.
+
+### Framework Convention Audit
+
+- [ ] Audit Laravel 13 attribute coverage against the installed framework attributes.
+- [ ] Convert Eloquent model static configuration to native attributes where Laravel provides direct replacements.
+- [ ] Convert controller middleware and policy authorization declarations to native attributes where the behavior belongs to a controller or action.
+- [ ] Convert queued job configuration properties to native queue attributes when jobs are added.
+- [ ] Convert service container contextual binding/provider boilerplate to native container attributes where possible.
+- [ ] Convert Artisan command signatures, descriptions, aliases, help, usage, and visibility metadata to console attributes when commands are added.
+- [ ] Add typed properties, method arguments, and return values wherever PHP can express the type accurately.
+- [ ] Add detailed PHPDoc generics and shape annotations where native PHP types are not specific enough.
+- [ ] Raise PHPStan/Larastan strictness after the attribute/type audit if the codebase passes without noisy framework false positives.
 
 ## Phase 2 - Runtime Infrastructure
 
@@ -471,17 +514,19 @@ Third-party APIs should not leak directly into application logic.
 
 ### CI
 
-- [ ] Add GitHub Actions workflow.
-- [ ] Run Composer validation.
-- [ ] Run Rector validation.
-- [ ] Run Pint validation.
-- [ ] Run PHPStan/Larastan.
-- [ ] Run PHPUnit.
-- [ ] Run npm lint check.
-- [ ] Run npm format check.
-- [ ] Generate Wayfinder routes/forms before TypeScript validation.
-- [ ] Run TypeScript check.
-- [ ] Run frontend build verification.
+- [x] Add GitHub Actions workflow.
+- [x] Run Composer validation.
+- [x] Run Composer dependency audit.
+- [x] Run Rector validation.
+- [x] Run Pint validation.
+- [x] Run PHPStan/Larastan.
+- [x] Run PHPUnit.
+- [x] Run npm lint check.
+- [x] Run npm format check.
+- [x] Run npm dependency audit.
+- [x] Generate Wayfinder routes/forms before TypeScript validation.
+- [x] Run TypeScript check.
+- [x] Run frontend build verification.
 
 ### Documentation
 
@@ -509,6 +554,7 @@ Third-party APIs should not leak directly into application logic.
 - [x] PHP and Node runtime requirements are pinned.
 - [x] Root config files do not reference missing packages or missing config files.
 - [ ] Core package installation is complete.
+- [ ] Laravel 13 attribute and type audit is complete.
 - [ ] DTO architecture is documented and demonstrated.
 - [ ] Action architecture is documented and demonstrated.
 - [ ] Authorization system is installed and demonstrated.
@@ -516,6 +562,6 @@ Third-party APIs should not leak directly into application logic.
 - [ ] Design system foundation is complete.
 - [ ] Core UI components are complete.
 - [ ] DataTable framework is complete.
-- [ ] Static analysis tooling passes, including Rector and PHPStan/Larastan once Larastan is installed.
+- [x] Static analysis tooling passes, including Rector and PHPStan/Larastan.
 - [ ] CI pipeline passes.
 - [ ] Documentation is complete enough for a new project to start from this kit without archaeological work.

@@ -21,6 +21,7 @@
   },
   "require-dev": {
     "fakerphp/faker": "^1.24",
+    "larastan/larastan": "^3.10",
     "laravel/boost": "^2.4",
     "laravel/pail": "^1.2.5",
     "laravel/pao": "^1.0.6",
@@ -68,9 +69,16 @@
     "rector:check": [
       "rector --dry-run"
     ],
+    "phpstan": [
+      "phpstan analyse"
+    ],
+    "phpstan:check": [
+      "phpstan analyse --no-progress"
+    ],
     "ci:check": [
       "Composer\\Config::disableProcessTimeout",
       "@rector:check",
+      "@phpstan:check",
       "npm run lint:check",
       "npm run format:check",
       "@php artisan wayfinder:generate --with-form --no-interaction",
