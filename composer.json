@@ -83,6 +83,7 @@
       "npm run format:check",
       "@php artisan wayfinder:generate --with-form --no-interaction",
       "npm run types:check",
+      "npm run build",
       "@test"
     ],
     "test": [

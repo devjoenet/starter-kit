@@ -10,10 +10,12 @@ jobs:
   quality:
     name: Quality Gate
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -24,13 +26,20 @@ jobs:
           tools: composer:v2
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: npm
 
       - name: Set up npm
         run: npm install --global npm@11.13.0
+
+      - name: Show tool versions
+        run: |
+          php --version
+          composer --version
+          node --version
+          npm --version
 
       - name: Validate Composer metadata
         run: composer validate --strict
@@ -43,7 +52,42 @@ jobs:
 
       - name: Prepare Laravel environment
         run: |
-          cp .env.example .env
+          cat > .env <<'EOF'
+          APP_NAME="Southeast Code"
+          APP_ENV=testing
+          APP_KEY=
+          APP_DEBUG=false
+          APP_URL=http://localhost
+
+          APP_LOCALE=en
+          APP_FALLBACK_LOCALE=en
+          APP_FAKER_LOCALE=en_US
+
+          APP_MAINTENANCE_DRIVER=file
+          BCRYPT_ROUNDS=4
+
+          LOG_CHANNEL=stack
+          LOG_STACK=single
+          LOG_DEPRECATIONS_CHANNEL=null
+          LOG_LEVEL=error
+
+          DB_CONNECTION=sqlite
+          DB_DATABASE=:memory:
+          DB_URL=
+
+          SESSION_DRIVER=array
+          BROADCAST_CONNECTION=null
+          FILESYSTEM_DISK=local
+          QUEUE_CONNECTION=sync
+          CACHE_STORE=array
+          MAIL_MAILER=array
+
+          PULSE_ENABLED=false
+          TELESCOPE_ENABLED=false
+          NIGHTWATCH_ENABLED=false
+
+          VITE_APP_NAME="${APP_NAME}"
+          EOF
           php artisan key:generate --force
 
       - name: Install npm dependencies
@@ -54,6 +98,3 @@ jobs:
 
       - name: Run quality checks
         run: composer run ci:check
-
-      - name: Build frontend assets
-        run: npm run build
