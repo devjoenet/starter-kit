@@ -4,7 +4,7 @@
 - Node 24.16.0+
 - npm 11.13.0 via `packageManager`
 - MySQL 8+ for local application data
-- SQLite in-memory for the current PHPUnit test configuration
+- SQLite in-memory for the current Pest/PHPUnit test configuration
 - Redis available in environment configuration, not yet the default cache/queue/session store
 - Vue 3
 - TypeScript
@@ -44,9 +44,13 @@ Already present:
 - Lucide icon package
 - Rector configuration and dependency
 - PHPStan/Larastan configuration and dependency
+- PestStan configuration for Pest-aware static analysis
 - Laravel Boost and Pao development tooling
+- Project-local Artisan generator guidance
+- Project-local Boost guideline for Pest testing conventions
+- Custom Laravel generator stubs with strict typing defaults
 - Basic layouts, settings pages, dashboard, and auth pages
-- PHPUnit test structure and existing auth/settings tests
+- Pest test structure and existing auth/settings tests
 - GitHub Actions CI workflow
 
 Not yet present:
@@ -77,7 +81,7 @@ Checked root config and dotfiles against `composer.json` and `package.json`.
 - Local PHP and Composer commands should run through Herd.
 - npm commands should run from the Node version in `.nvmrc`; `herd npm` is not available in the current local Herd setup.
 
-PHP 8.5 is a deliberately high floor for a starter kit. Keep it only if consuming projects are expected to start on PHP 8.5; lowering it later will require a Composer constraint change plus a full Rector, Pint, PHPUnit, and frontend verification pass.
+PHP 8.5 is a deliberately high floor for a starter kit. Keep it only if consuming projects are expected to start on PHP 8.5; lowering it later will require a Composer constraint change plus a full Rector, Pint, Pest, and frontend verification pass.
 
 ### Present and Satisfied Package References
 
@@ -137,6 +141,21 @@ Typing rules:
 - Use detailed PHPDoc when native PHP types are not expressive enough, especially for arrays, collections, Eloquent builders, paginator payloads, validated request data, closures, generators, and iterable service collections.
 - Prefer precise generics over vague arrays, for example `array<string, mixed>`, `Collection<int, User>`, or `Builder<User>`.
 - Keep PHPStan/Larastan passing without baselines or inline ignores unless a framework limitation leaves no honest alternative.
+
+Current implementation notes:
+
+- Existing application model configuration uses native Laravel attributes where available. `User` uses `#[Fillable]` and `#[Hidden]` instead of static model properties.
+- Current PHP tests use Pest syntax with explicit `void` closure return types.
+- Custom generator stubs in `stubs/` should keep generated PHP files on the strict typing path by default.
+- PHPStan/Larastan currently runs at level 6 with PestStan enabled for Pest tests.
+
+### Artisan Generators
+
+Use Artisan generators before creating Laravel PHP classes by hand.
+
+Project stubs in `stubs/` are the source of generated defaults. They should include `declare(strict_types=1)`, explicit return types, and precise PHPDoc for arrays, generics, and framework contracts where native PHP types are not expressive enough.
+
+If a generated file needs manual cleanup after creation, edit the generated file rather than bypassing the generator. Civilization hangs by thinner threads, apparently.
 
 ### Controllers
 
@@ -401,20 +420,28 @@ Third-party APIs should not leak directly into application logic.
 - [x] Install Laravel Boost/Pao development tooling.
 - [x] Install `larastan/larastan`.
 - [x] Add `phpstan.neon`.
-- [ ] Decide whether to keep PHPUnit only or adopt Pest.
-- [x] Remove `pestphp/pest-plugin` from Composer `allow-plugins` if Pest is not adopted.
+- [x] Add project-local Artisan generator guidance.
+- [x] Add project-local Boost guideline for Pest testing conventions.
+- [x] Add custom Laravel generator stubs with strict typing defaults.
+- [x] Adopt Pest as the primary test style.
+- [x] Install `pestphp/pest`.
+- [x] Install `mrpunyapal/peststan` for Pest-aware PHPStan analysis.
+- [x] Add Pest Composer plugin approval to `allow-plugins`.
 
 ### Framework Convention Audit
 
-- [ ] Audit Laravel 13 attribute coverage against the installed framework attributes.
-- [ ] Convert Eloquent model static configuration to native attributes where Laravel provides direct replacements.
+- [x] Audit Laravel 13 attribute coverage for the current model/test surface and generator defaults.
+- [x] Convert existing Eloquent model static configuration to native attributes where Laravel provides direct replacements.
 - [ ] Convert controller middleware and policy authorization declarations to native attributes where the behavior belongs to a controller or action.
 - [ ] Convert queued job configuration properties to native queue attributes when jobs are added.
 - [ ] Convert service container contextual binding/provider boilerplate to native container attributes where possible.
-- [ ] Convert Artisan command signatures, descriptions, aliases, help, usage, and visibility metadata to console attributes when commands are added.
-- [ ] Add typed properties, method arguments, and return values wherever PHP can express the type accurately.
-- [ ] Add detailed PHPDoc generics and shape annotations where native PHP types are not specific enough.
-- [ ] Raise PHPStan/Larastan strictness after the attribute/type audit if the codebase passes without noisy framework false positives.
+- [x] Add console command stubs that use native console attributes for generated command signatures.
+- [x] Convert current PHPUnit class tests to Pest syntax.
+- [x] Add typed `void` closures to current Pest tests.
+- [x] Add PHPDoc generics for current framework contracts that PHPStan needs, such as `HasFactory`.
+- [x] Raise PHPStan/Larastan strictness from level 5 to level 6.
+- [ ] Continue applying native attributes, typed signatures, and detailed PHPDoc to future controllers, jobs, commands, policies, actions, and data objects as they are added.
+- [ ] Evaluate raising PHPStan/Larastan beyond level 6 after broader application features exist.
 
 ## Phase 2 - Runtime Infrastructure
 
@@ -520,7 +547,7 @@ Third-party APIs should not leak directly into application logic.
 - [x] Run Rector validation.
 - [x] Run Pint validation.
 - [x] Run PHPStan/Larastan.
-- [x] Run PHPUnit.
+- [x] Run Pest through the Artisan test runner.
 - [x] Run npm lint check.
 - [x] Run npm format check.
 - [x] Run npm dependency audit.
@@ -537,6 +564,7 @@ Third-party APIs should not leak directly into application logic.
 - [ ] Write authorization guide.
 - [ ] Write contribution guide.
 - [x] Document package-manager choice.
+- [x] Document Artisan and Pest generated-file workflow.
 - [ ] Document generated file workflows for Wayfinder and TypeScript types.
 
 ### Templates
@@ -553,8 +581,10 @@ Third-party APIs should not leak directly into application logic.
 - [x] Package manager and lock file are settled.
 - [x] PHP and Node runtime requirements are pinned.
 - [x] Root config files do not reference missing packages or missing config files.
+- [x] Pest is the primary test style and generated test stubs use Pest syntax.
 - [ ] Core package installation is complete.
-- [ ] Laravel 13 attribute and type audit is complete.
+- [x] Current Laravel 13 attribute/type baseline is audited and enforced through generator stubs.
+- [ ] New application features added before 1.0 pass the same Laravel 13 attribute/type standard.
 - [ ] DTO architecture is documented and demonstrated.
 - [ ] Action architecture is documented and demonstrated.
 - [ ] Authorization system is installed and demonstrated.
