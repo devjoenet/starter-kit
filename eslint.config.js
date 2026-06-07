@@ -47,13 +47,7 @@ export default defineConfigWithVueTs(
                     fixStyle: 'separate-type-imports',
                 },
             ],
-            'import/order': [
-                'error',
-                {
-                    groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
-                    alphabetize: { order: 'asc', caseInsensitive: true },
-                },
-            ],
+            'import/order': 'off',
             'import/consistent-type-specifier-style': [
                 'error',
                 'prefer-top-level',
